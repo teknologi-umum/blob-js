@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ 14, 16, 18, 20 ]
+    services:
+      minio:
+        image: minio/minio:edge-cicd
+        env:
+          MINIO_ROOT_USER: teknologi-umum
+          MINIO_ROOT_PASSWORD: very-strong-password
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "curl -f http://bucket:9000/minio/health/live"
+          --health-interval 45s
+          --health-timeout 30s
+          --health-retries 10
+          --health-start-period 120s
+        volumes:
+          - minio-data:/data
+      gcs:
+        image: fsouza/fake-gcs-server
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npx eslint --ignore-path .gitignore --ext .json,.ts .
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npx vitest run --coverage
+        env:
+          VAULT_ADDRESS: http://localhost:8200
+          VAULT_TOKEN: 2852e82e-c84c-4a82-8339-61b9ec503816
+
+      - name: Send coverage report to Codecov
+        uses: codecov/codecov-action@v3
