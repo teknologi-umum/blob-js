@@ -2,9 +2,7 @@ import { type IObjectStorage, PutOptions, StatResponse } from "./interface";
 import { parseConnectionString } from "./connectionString";
 import { FileStorage } from "./file/file";
 import { Readable, Writable } from "node:stream";
-import { S3Storage } from "./s3/s3";
-import { AzureBlobStorage } from "./azblob/azblob";
-import { GcsStorage } from "./gcs/gcs";
+
 
 export class Storage implements IObjectStorage {
     readonly #implementation: IObjectStorage;
@@ -15,15 +13,15 @@ export class Storage implements IObjectStorage {
             case "file":
                 this.#implementation = new FileStorage(parsedConnectionString.bucketName);
                 break;
-            case "s3":
-                this.#implementation = new S3Storage(parsedConnectionString);
-                break;
-            case "azblob":
-                this.#implementation = new AzureBlobStorage(parsedConnectionString);
-                break;
-            case "gcs":
-                this.#implementation = new GcsStorage(parsedConnectionString);
-                break;
+            // case "s3":
+            //     this.#implementation = new S3Storage(parsedConnectionString);
+            //     break;
+            // case "azblob":
+            //     this.#implementation = new AzureBlobStorage(parsedConnectionString);
+            //     break;
+            // case "gcs":
+            //     this.#implementation = new GcsStorage(parsedConnectionString);
+            //     break;
             default:
                 throw new TypeError("Invalid provider");
         }
