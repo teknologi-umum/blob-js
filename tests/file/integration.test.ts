@@ -40,7 +40,7 @@ describe("File Provider - Integration", () => {
         const fileStat = await fileStorage.stat("lorem-ipsum.txt");
         expect(fileStat.size).toStrictEqual(content.length);
 
-        const fileContent = await fileStorage.get("lorem-ipsum.txt")
+        const fileContent = await fileStorage.get("lorem-ipsum.txt");
         expect(fileContent.toString()).toStrictEqual(content);
 
         expect(fileStorage.delete("lorem-ipsum.txt"))
@@ -51,10 +51,10 @@ describe("File Provider - Integration", () => {
     it("should be able to list many files", async () => {
         const fileStorage = new FileStorage(temporaryDirectory);
         const totalFiles = 20;
-        const tasks: Promise<void>[] = []
+        const tasks: Promise<void>[] = [];
         for (let i = 1; i <= totalFiles; i++) {
-           const content = loremIpsum();
-           tasks.push(fileStorage.put(`lorem${i}.txt`, content));
+            const content = loremIpsum();
+            tasks.push(fileStorage.put(`lorem${i}.txt`, content));
         }
 
         await Promise.all(tasks);
@@ -74,13 +74,13 @@ describe("File Provider - Integration", () => {
         const fileStorage = new FileStorage(temporaryDirectory);
         const paths = new Set<string>();
         const totalFiles = 20;
-        const tasks: Promise<void>[] = []
+        const tasks: Promise<void>[] = [];
         for (let i = 1; i <= totalFiles; i++) {
             const content = loremIpsum();
             let filePath: string;
             if (i % 3 === 0) {
                 filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}.txt`;
-            } else if (i % 2 == 0) {
+            } else if (i % 2 === 0) {
                 filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}.txt`;
             } else {
                 filePath = `${loremIpsum({count: 1, units: "word"})}.txt`;
@@ -101,5 +101,5 @@ describe("File Provider - Integration", () => {
         }
 
         expect(count).toStrictEqual(totalFiles);
-    })
-})
+    });
+});

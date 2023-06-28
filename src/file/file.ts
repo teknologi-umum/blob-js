@@ -53,7 +53,7 @@ export class FileStorage implements IObjectStorage {
                     throw new BlobFileNotExistError(path);
                 }
 
-                if (error.code == "EPERM") {
+                if (error.code === "EPERM") {
                     throw new BlobFilePermissionDeniedError(path);
                 }
             }
