@@ -36,6 +36,6 @@ export function parseConnectionString(str: string): ConnectionString {
         bucketName: parsedUrl.host + parsedUrl.pathname,
         parameters: parameters,
         username: parsedUrl.username !== "" ? parsedUrl.username : undefined,
-        password: parsedUrl.password !== "" ? parsedUrl.password : undefined,
-    }
+        password: parsedUrl.password !== "" ? parsedUrl.password : undefined
+    };
 }

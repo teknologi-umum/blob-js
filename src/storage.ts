@@ -10,7 +10,7 @@ export class Storage implements IObjectStorage {
     readonly #implementation: IObjectStorage;
 
     constructor(connectionString: string) {
-        const parsedConnectionString = parseConnectionString(connectionString)
+        const parsedConnectionString = parseConnectionString(connectionString);
         switch (parsedConnectionString.provider) {
             case "file":
                 this.#implementation = new FileStorage(parsedConnectionString.bucketName);
