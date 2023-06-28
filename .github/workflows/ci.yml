@@ -63,7 +63,7 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npx eslint --ignore-path .gitignore --ext .json,.ts .
+        run: npx eslint --ignore-path .gitignore .
 
       - name: Build
         run: npm run build
