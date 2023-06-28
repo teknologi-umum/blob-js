@@ -57,11 +57,11 @@ export class Storage implements IObjectStorage {
         return this.#implementation.move(sourcePath, destinationPath);
     }
 
-    put(path: string, content: Uint8Array | ArrayBuffer | Buffer | string, options?: PutOptions): Promise<void> {
+    put(path: string, content: Buffer | string, options?: PutOptions): Promise<void> {
         return this.#implementation.put(path, content, options);
     }
 
-    putStream(path: string, options?: PutOptions): Writable {
+    putStream(path: string, options?: PutOptions): Promise<Writable> {
         return this.#implementation.putStream(path, options);
     }
 
