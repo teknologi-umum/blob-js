@@ -70,9 +70,6 @@ jobs:
 
       - name: Test
         run: npx vitest run --coverage
-        env:
-          VAULT_ADDRESS: http://localhost:8200
-          VAULT_TOKEN: 2852e82e-c84c-4a82-8339-61b9ec503816
 
       - name: Send coverage report to Codecov
         uses: codecov/codecov-action@v3
