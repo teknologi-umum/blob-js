@@ -13,7 +13,7 @@ describe("File Provider - Unit", () => {
 
     beforeAll(async () => {
         if (process.env?.TEMP_DIR) {
-            temporaryDirectory = process.env.TEMP_DIR;
+            temporaryDirectory = await mkdtemp(join(process.env.TEMP_DIR, "blob-js"));
         } else {
             temporaryDirectory = await mkdtemp(join(realpathSync(tmpdir()), "blob-js"));
         }
