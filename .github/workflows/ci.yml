@@ -70,7 +70,8 @@ jobs:
 
       - name: Validate temporary directory permission
         run: |
-          sudo chown -R $(whoami):$(whoami) ${{ runner.temp }}
+          echo $(whoami)
+          sudo chown -R runner:runner ${{ runner.temp }}
           sudo chmod 755 ${{ runner.temp }}
 
       - name: Test
