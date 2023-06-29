@@ -68,6 +68,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Validate temporary directory permission
+        run: |
+          sudo chown -R $(whoami):$(whoami) ${{ runner.temp }}
+          sudo chmod 755 ${{ runner.temp }}
+
       - name: Test
         run: npx vitest run --coverage
         env:
