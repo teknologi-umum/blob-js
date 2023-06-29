@@ -69,12 +69,16 @@ jobs:
         run: npm run build
 
       - name: Validate temporary directory permission
-        run: mkdir -p $(cwd)/tmp/
+        run: |
+          sudo mkdir -p ${{ runner.temp }}
+          sudo chmod 755 ${{ runner.temp }}
+          sudo chown -R runner:runner ${{ runner.temp }}
+          mkdir -p ${{ runner.temp }}/blob-js 
 
       - name: Test
         run: npx vitest run --coverage
         env:
-          TEMP_DIR: $(cwd)/tmp/
+          TEMP_DIR: ${{ runner.temp }}/blob-js
 
       - name: Send coverage report to Codecov
         uses: codecov/codecov-action@v3
