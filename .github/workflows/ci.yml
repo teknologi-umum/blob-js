@@ -5,8 +5,8 @@ on:
   pull_request:
 
 jobs:
-  ci:
-    name: CI
+  linux-ci:
+    name: Linux
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -69,15 +69,12 @@ jobs:
         run: npm run build
 
       - name: Validate temporary directory permission
-        run: |
-          echo $(whoami)
-          sudo chown -R runner:runner ${{ runner.temp }}
-          sudo chmod 755 ${{ runner.temp }}
+        run: mkdir -p $(cwd)/tmp/
 
       - name: Test
         run: npx vitest run --coverage
         env:
-          TEMP_DIR: ${{ runner.temp }}
+          TEMP_DIR: ./tmp
 
       - name: Send coverage report to Codecov
         uses: codecov/codecov-action@v3
