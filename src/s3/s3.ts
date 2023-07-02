@@ -13,7 +13,33 @@ export class S3Storage implements IObjectStorage {
     private readonly client: S3Client;
     private readonly bucketName: string;
     constructor(config: ConnectionString) {
-        let clientConfig: S3ClientConfig = {}
+        const clientConfig: S3ClientConfig = {};
+
+        if (config.username !== undefined && config.username !== "" && config.password !== undefined && config.password !== "") {
+            clientConfig.credentials = {
+                accessKeyId: config.username,
+                secretAccessKey: config.password
+            };
+        }
+
+        if (config.parameters !== undefined) {
+            if ("region" in config.parameters && typeof config.parameters.region === "string") {
+                clientConfig.region = config.parameters.region;
+            }
+
+            if ("forcePathStyle" in config.parameters) {
+                clientConfig.forcePathStyle = Boolean(config.parameters.forcePathStyle);
+            }
+
+            if ("useAccelerateEndpoint" in config.parameters) {
+                clientConfig.useAccelerateEndpoint = Boolean(config.parameters.useAccelerateEndpoint);
+            }
+
+            if ("disableMultiregionAccessPoints" in config.parameters) {
+                clientConfig.disableMultiregionAccessPoints = Boolean(config.parameters.disableMultiregionAccessPoints);
+            }
+        }
+
         this.client = new S3Client(clientConfig);
         this.bucketName = config.bucketName;
     }
@@ -87,7 +113,7 @@ export class S3Storage implements IObjectStorage {
         return Promise.resolve(undefined);
     }
 
-    put(path: string, content: Uint8Array | ArrayBuffer | Buffer | string, options?: PutOptions): Promise<void> {
+    put(path: string, content: Buffer | string, options?: PutOptions): Promise<void> {
         return Promise.resolve(undefined);
     }
 

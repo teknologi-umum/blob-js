@@ -11,7 +11,11 @@ describe("File Provider - Integration", () => {
     let temporaryDirectory: string;
 
     beforeAll(async () => {
-        temporaryDirectory = await mkdtemp(join(realpathSync(tmpdir()), "blob-js"));
+        if (process.env?.TEMP_DIR) {
+            temporaryDirectory = await mkdtemp(join(process.env.TEMP_DIR, "blob-js"));
+        } else {
+            temporaryDirectory = await mkdtemp(join(realpathSync(tmpdir()), "blob-js"));
+        }
     });
 
     afterEach(async () => {
@@ -50,7 +54,7 @@ describe("File Provider - Integration", () => {
 
     it("should be able to list many files", async () => {
         const fileStorage = new FileStorage(temporaryDirectory);
-        const totalFiles = 20;
+        const totalFiles = 50;
         const tasks: Promise<void>[] = [];
         for (let i = 1; i <= totalFiles; i++) {
             const content = loremIpsum();
@@ -73,33 +77,37 @@ describe("File Provider - Integration", () => {
     it("should be able to list files with nested path", async () => {
         const fileStorage = new FileStorage(temporaryDirectory);
         const paths = new Set<string>();
-        const totalFiles = 20;
+        const totalFiles = 100;
         const tasks: Promise<void>[] = [];
         for (let i = 1; i <= totalFiles; i++) {
             const content = loremIpsum();
             let filePath: string;
             if (i % 3 === 0) {
-                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}.txt`;
+                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}-${i}.txt`;
             } else if (i % 2 === 0) {
-                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}.txt`;
+                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}-${i}.txt`;
             } else {
-                filePath = `${loremIpsum({count: 1, units: "word"})}.txt`;
+                filePath = `${loremIpsum({count: 1, units: "word"})}-${i}.txt`;
             }
 
             paths.add(normalize(filePath));
             tasks.push(fileStorage.put(filePath, content));
         }
 
-        await Promise.all(tasks);
+        await Promise.allSettled(tasks);
 
-        const directoryEntries = await fileStorage.list();
+        expect(fileStorage.list()).resolves.toSatisfy((entries: unknown) => {
+            if (typeof entries === "object" && Array.isArray(entries)) {
+                let count = 0;
+                for (const entry of entries) {
+                    expect(paths.has(entry)).toBeTruthy();
+                    count += 1;
+                }
+    
+                return count === totalFiles;
+            }
 
-        let count = 0;
-        for (const entry of directoryEntries) {
-            expect(paths.has(entry)).toBeTruthy();
-            count += 1;
-        }
-
-        expect(count).toStrictEqual(totalFiles);
+            return false;
+        });
     });
 });

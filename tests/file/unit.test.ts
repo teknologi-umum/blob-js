@@ -12,7 +12,11 @@ describe("File Provider - Unit", () => {
     let temporaryDirectory: string;
 
     beforeAll(async () => {
-        temporaryDirectory = await mkdtemp(join(realpathSync(tmpdir()), "blob-js"));
+        if (process.env?.TEMP_DIR) {
+            temporaryDirectory = await mkdtemp(join(process.env.TEMP_DIR, "blob-js"));
+        } else {
+            temporaryDirectory = await mkdtemp(join(realpathSync(tmpdir()), "blob-js"));
+        }
     });
 
     afterEach(async () => {

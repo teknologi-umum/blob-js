@@ -1,12 +1,11 @@
 import { type IObjectStorage, type PutOptions, type StatResponse } from "../interface";
 import { Readable, Writable } from "node:stream";
-import { access, copyFile, rm, stat, readFile, open, cp, readdir, writeFile } from "node:fs/promises";
+import { access, copyFile, rm, stat, readFile, open, cp, readdir, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { BlobFileNotExistError, BlobFilePermissionDeniedError, BlobMismatchedMD5IntegrityError } from "../errors";
 import { dirname } from "node:path";
-import { mkdir } from "fs/promises";
 
 export class FileStorage implements IObjectStorage {
     private readonly basePath: string;
@@ -80,13 +79,13 @@ export class FileStorage implements IObjectStorage {
         }
     }
 
-    async list(path = "."): Promise<Iterable<string>> {
-        const files: string[] = [];
+    async list(path = "."): Promise<Array<string>> {
+        let files: string[] = [];
         const directoryEntries = await readdir(join(this.basePath, path), { withFileTypes: true, recursive: true });
         for await (const directory of directoryEntries) {
             if (directory.isDirectory()) {
                 const subdirectoryFiles = await this.list(join(path, directory.name));
-                files.push(...subdirectoryFiles);
+                files = files.concat(subdirectoryFiles);
                 continue;
             }
 
@@ -132,6 +131,7 @@ export class FileStorage implements IObjectStorage {
             const calculatedMD5 = hashFunc.digest("base64");
 
             if (options.contentMD5 !== calculatedMD5) {
+                await this.delete(path);
                 throw new BlobMismatchedMD5IntegrityError(options.contentMD5, calculatedMD5);
             }
         }
