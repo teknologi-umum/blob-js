@@ -1,4 +1,4 @@
-import { URL } from "url";
+import { URL } from "node:url";
 
 export type ConnectionString = {
     provider: "file" | "s3" | "gcs" | "azblob",

@@ -14,5 +14,6 @@ export default {
             sourcemap: true
         },
     ],
-    plugins: [ts({ tsconfig: "./tsconfig.json" })]
+    plugins: [ts({ tsconfig: "./tsconfig.json" })],
+    external: [/node:(.+)/, "@aws-sdk/client-s3", "@azure/storage-blob", "@google-cloud/storage"]
 };

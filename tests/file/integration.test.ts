@@ -6,7 +6,6 @@ import { tmpdir } from "node:os";
 import { loremIpsum } from "lorem-ipsum";
 import { FileStorage } from "../../src/file/file";
 import { createHash } from "node:crypto";
-import console from "node:console";
 
 describe("File Provider - Integration", () => {
     let temporaryDirectory: string;

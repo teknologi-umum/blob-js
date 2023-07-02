@@ -1,12 +1,11 @@
 import { type IObjectStorage, type PutOptions, type StatResponse } from "../interface";
 import { Readable, Writable } from "node:stream";
-import { access, copyFile, rm, stat, readFile, open, cp, readdir, writeFile } from "node:fs/promises";
+import { access, copyFile, rm, stat, readFile, open, cp, readdir, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { BlobFileNotExistError, BlobFilePermissionDeniedError, BlobMismatchedMD5IntegrityError } from "../errors";
 import { dirname } from "node:path";
-import { mkdir } from "fs/promises";
 
 export class FileStorage implements IObjectStorage {
     private readonly basePath: string;
