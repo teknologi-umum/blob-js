@@ -78,7 +78,6 @@ describe("File Provider - Integration", () => {
         const fileStorage = new FileStorage(temporaryDirectory);
         const paths = new Set<string>();
         const totalFiles = 20;
-        const tasks: Promise<void>[] = [];
         for (let i = 1; i <= totalFiles; i++) {
             const content = loremIpsum();
             let filePath: string;
@@ -91,12 +90,12 @@ describe("File Provider - Integration", () => {
             }
 
             paths.add(normalize(filePath));
-            tasks.push(fileStorage.put(filePath, content));
+            expect(fileStorage.put(filePath, content)).resolves.ok;
         }
 
-        await Promise.all(tasks);
-
         const directoryEntries = await fileStorage.list();
+
+        expect(directoryEntries).toHaveLength(totalFiles);
 
         let count = 0;
         for (const entry of directoryEntries) {
