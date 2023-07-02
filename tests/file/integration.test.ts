@@ -83,11 +83,11 @@ describe("File Provider - Integration", () => {
             const content = loremIpsum();
             let filePath: string;
             if (i % 3 === 0) {
-                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}.txt`;
+                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}-${i}.txt`;
             } else if (i % 2 === 0) {
-                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}.txt`;
+                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}-${i}.txt`;
             } else {
-                filePath = `${loremIpsum({count: 1, units: "word"})}.txt`;
+                filePath = `${loremIpsum({count: 1, units: "word"})}-${i}.txt`;
             }
 
             paths.add(normalize(filePath));
