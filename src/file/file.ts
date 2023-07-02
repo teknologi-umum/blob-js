@@ -81,12 +81,12 @@ export class FileStorage implements IObjectStorage {
     }
 
     async list(path = "."): Promise<Array<string>> {
-        const files: string[] = [];
+        let files: string[] = [];
         const directoryEntries = await readdir(join(this.basePath, path), { withFileTypes: true, recursive: true });
         for await (const directory of directoryEntries) {
             if (directory.isDirectory()) {
                 const subdirectoryFiles = await this.list(join(path, directory.name));
-                files.concat(subdirectoryFiles);
+                files = files.concat(subdirectoryFiles);
                 continue;
             }
 
@@ -132,6 +132,7 @@ export class FileStorage implements IObjectStorage {
             const calculatedMD5 = hashFunc.digest("base64");
 
             if (options.contentMD5 !== calculatedMD5) {
+                await this.delete(path);
                 throw new BlobMismatchedMD5IntegrityError(options.contentMD5, calculatedMD5);
             }
         }

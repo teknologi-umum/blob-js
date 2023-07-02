@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import { loremIpsum } from "lorem-ipsum";
 import { FileStorage } from "../../src/file/file";
 import { createHash } from "node:crypto";
+import console from "node:console";
 
 describe("File Provider - Integration", () => {
     let temporaryDirectory: string;
@@ -54,7 +55,7 @@ describe("File Provider - Integration", () => {
 
     it("should be able to list many files", async () => {
         const fileStorage = new FileStorage(temporaryDirectory);
-        const totalFiles = 20;
+        const totalFiles = 50;
         const tasks: Promise<void>[] = [];
         for (let i = 1; i <= totalFiles; i++) {
             const content = loremIpsum();
@@ -77,7 +78,8 @@ describe("File Provider - Integration", () => {
     it("should be able to list files with nested path", async () => {
         const fileStorage = new FileStorage(temporaryDirectory);
         const paths = new Set<string>();
-        const totalFiles = 20;
+        const totalFiles = 100;
+        const tasks: Promise<void>[] = [];
         for (let i = 1; i <= totalFiles; i++) {
             const content = loremIpsum();
             let filePath: string;
@@ -90,19 +92,23 @@ describe("File Provider - Integration", () => {
             }
 
             paths.add(normalize(filePath));
-            expect(fileStorage.put(filePath, content)).resolves.ok;
+            tasks.push(fileStorage.put(filePath, content));
         }
 
-        const directoryEntries = await fileStorage.list();
+        await Promise.allSettled(tasks);
 
-        expect(directoryEntries).toHaveLength(totalFiles);
+        expect(fileStorage.list()).resolves.toSatisfy((entries: unknown) => {
+            if (typeof entries === "object" && Array.isArray(entries)) {
+                let count = 0;
+                for (const entry of entries) {
+                    expect(paths.has(entry)).toBeTruthy();
+                    count += 1;
+                }
+    
+                return count === totalFiles;
+            }
 
-        let count = 0;
-        for (const entry of directoryEntries) {
-            expect(paths.has(entry)).toBeTruthy();
-            count += 1;
-        }
-
-        expect(count).toStrictEqual(totalFiles);
+            return false;
+        });
     });
 });
