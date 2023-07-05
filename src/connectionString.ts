@@ -1,4 +1,4 @@
-import { URL } from "url";
+import { URL } from "node:url";
 
 export type ConnectionString = {
     provider: "file" | "s3" | "gcs" | "azblob",
@@ -36,6 +36,6 @@ export function parseConnectionString(str: string): ConnectionString {
         bucketName: parsedUrl.host + parsedUrl.pathname,
         parameters: parameters,
         username: parsedUrl.username !== "" ? parsedUrl.username : undefined,
-        password: parsedUrl.password !== "" ? parsedUrl.password : undefined,
-    }
+        password: parsedUrl.password !== "" ? parsedUrl.password : undefined
+    };
 }

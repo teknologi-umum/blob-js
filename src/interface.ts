@@ -1,4 +1,4 @@
-import { Readable, Writable } from "stream";
+import { Readable, Writable } from "node:stream";
 
 export type StatResponse = {
     /**
@@ -109,9 +109,9 @@ export type PutOptions = {
 }
 
 export interface IObjectStorage {
-    put(path: string, content: Uint8Array | ArrayBuffer | Buffer | string, options?: PutOptions): Promise<void>
+    put(path: string, content: Buffer | string, options?: PutOptions): Promise<void>
 
-    putStream(path: string, options?: PutOptions): Writable;
+    putStream(path: string, options?: PutOptions): Promise<Writable>;
 
     get(path: string, encoding?: string): Promise<Buffer>
 
