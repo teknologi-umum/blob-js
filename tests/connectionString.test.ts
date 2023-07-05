@@ -3,7 +3,7 @@ import { parseConnectionString } from "../src/connectionString";
 
 describe("parseConnectionString", () => {
     it("should parse S3 connection string", () => {
-        const connectionString = parseConnectionString("s3://accesskey:secretkey@my-bucket?region=us-west-1&awssdk=2&endpoint=minio.selfhosted.com&s3ForcePathStyle=false&disableSSL=true")
+        const connectionString = parseConnectionString("s3://accesskey:secretkey@my-bucket?region=us-west-1&awssdk=2&endpoint=minio.selfhosted.com&s3ForcePathStyle=false&disableSSL=true");
         expect(connectionString.bucketName).toStrictEqual("my-bucket");
         expect(connectionString.provider).toStrictEqual("s3");
         expect(connectionString.password).toStrictEqual("secretkey");

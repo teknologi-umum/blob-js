@@ -5,12 +5,10 @@ on:
   pull_request:
 
 jobs:
-  ci:
-    name: CI
+  linux-ci:
+    name: Linux
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [ 14, 16, 18, 20 ]
+    container: node:lts
     services:
       minio:
         image: minio/minio:edge-cicd
@@ -50,16 +48,14 @@ jobs:
           head: HEAD
           extra_args: --debug --only-verified
 
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
+      - name: Bump npm version
+        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: npm ci
 
       - name: Lint
-        run: npx eslint --ignore-path .gitignore --ext .json,.ts .
+        run: npx eslint --ignore-path .gitignore .
 
       - name: Build
         run: npm run build
@@ -67,8 +63,7 @@ jobs:
       - name: Test
         run: npx vitest run --coverage
         env:
-          VAULT_ADDRESS: http://localhost:8200
-          VAULT_TOKEN: 2852e82e-c84c-4a82-8339-61b9ec503816
+          TEMP_DIR: ${{ runner.temp }}
 
       - name: Send coverage report to Codecov
         uses: codecov/codecov-action@v3
