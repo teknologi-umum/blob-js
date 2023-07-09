@@ -4,7 +4,8 @@ import { Readable, Writable } from "node:stream";
 import {
     CopyObjectCommand,
     DeleteObjectCommand,
-    GetObjectCommand, ListObjectsV2Command,
+    GetObjectCommand, HeadObjectCommand, ListObjectsV2Command,
+    NotFound,
     S3Client,
     type S3ClientConfig
 } from "@aws-sdk/client-s3";
@@ -63,8 +64,21 @@ export class S3Storage implements IObjectStorage {
         await this.client.send(command);
     }
 
-    exists(path: string): Promise<boolean> {
-        return Promise.resolve(false);
+    async exists(path: string): Promise<boolean> {
+        try {
+            const command = new HeadObjectCommand({
+                Bucket: this.bucketName,
+                Key: path,
+            })
+        
+            await this.client.send(command);
+        } catch (error: unknown) {
+            if (error instanceof NotFound) {
+                return false;
+            }
+
+            throw error;
+        }
     }
 
     async get(path: string, encoding?: string): Promise<Buffer> {
