@@ -3,12 +3,13 @@ import { type ConnectionString } from "../connectionString";
 import { Readable, Writable } from "node:stream";
 import {
     CopyObjectCommand,
-    DeleteObjectCommand,
-    GetObjectCommand, HeadObjectCommand, ListObjectsV2Command,
-    NotFound,
+    DeleteObjectCommand, GetObjectAttributesCommand,
+    GetObjectCommand, HeadObjectCommand, ListObjectsV2Command, NoSuchKey,
+    NotFound, PutObjectCommand,
     S3Client,
-    type S3ClientConfig
+    type S3ClientConfig, S3ServiceException
 } from "@aws-sdk/client-s3";
+import { BlobFileNotExistError, BlobMismatchedMD5IntegrityError } from "../errors";
 
 export class S3Storage implements IObjectStorage {
     private readonly client: S3Client;
@@ -26,6 +27,10 @@ export class S3Storage implements IObjectStorage {
         if (config.parameters !== undefined) {
             if ("region" in config.parameters && typeof config.parameters.region === "string") {
                 clientConfig.region = config.parameters.region;
+            } else {
+                // See https://github.com/aws/aws-sdk-js-v3/issues/1845#issuecomment-754832210
+                clientConfig.region = "us-east-1";
+                clientConfig.disableHostPrefix = true;
             }
 
             if ("forcePathStyle" in config.parameters) {
@@ -39,6 +44,14 @@ export class S3Storage implements IObjectStorage {
             if ("disableMultiregionAccessPoints" in config.parameters) {
                 clientConfig.disableMultiregionAccessPoints = Boolean(config.parameters.disableMultiregionAccessPoints);
             }
+
+            if ("endpoint" in config.parameters && typeof config.parameters.endpoint === "string") {
+                clientConfig.endpoint = config.parameters.endpoint;
+            }
+
+            if ("disableHostPrefix" in config.parameters) {
+                clientConfig.disableHostPrefix = Boolean(config.parameters.disableHostPrefix);
+            }
         }
 
         this.client = new S3Client(clientConfig);
@@ -48,11 +61,20 @@ export class S3Storage implements IObjectStorage {
     async copy(sourcePath: string, destinationPath: string): Promise<void> {
         const command = new CopyObjectCommand({
             Bucket: this.bucketName,
-            CopySource: sourcePath,
+            CopySource: `${this.bucketName}/${sourcePath}`,
             Key: destinationPath
         });
 
-        await this.client.send(command);
+        try {
+            await this.client.send(command);
+        } catch (error: unknown) {
+            if (error instanceof NotFound || error instanceof NoSuchKey) {
+                throw new BlobFileNotExistError(sourcePath);
+            }
+
+            throw error;
+        }
+
     }
 
     async delete(path: string): Promise<void> {
@@ -68,12 +90,17 @@ export class S3Storage implements IObjectStorage {
         try {
             const command = new HeadObjectCommand({
                 Bucket: this.bucketName,
-                Key: path,
-            })
-        
-            await this.client.send(command);
+                Key: path
+            });
+
+            const response = await this.client.send(command);
+            if (response.DeleteMarker !== undefined) {
+                if (response.DeleteMarker) return false;
+            }
+
+            return true;
         } catch (error: unknown) {
-            if (error instanceof NotFound) {
+            if (error instanceof NotFound || error instanceof NoSuchKey) {
                 return false;
             }
 
@@ -84,17 +111,25 @@ export class S3Storage implements IObjectStorage {
     async get(path: string, encoding?: string): Promise<Buffer> {
         const command = new GetObjectCommand({
             Bucket: this.bucketName,
-            Key: path,
+            Key: path
         });
 
-        const response = await this.client.send(command);
+        try {
+            const response = await this.client.send(command);
 
-        if (response.Body == null) {
-            throw new Error("this can't be happening");
+            if (response.Body == null) {
+                throw new Error("this can't be happening");
+            }
+
+            const byteArray = await response.Body.transformToByteArray();
+            return Buffer.from(byteArray.buffer);
+        } catch (error: unknown) {
+            if (error instanceof NotFound || error instanceof NoSuchKey) {
+                throw new BlobFileNotExistError(path);
+            }
+
+            throw error;
         }
-
-        const byteArray = await response.Body.transformToByteArray();
-        return Buffer.from(byteArray.buffer);
     }
 
     async getStream(path: string): Promise<Readable> {
@@ -109,7 +144,7 @@ export class S3Storage implements IObjectStorage {
         const response = await this.client.send(command);
 
         if (response.Contents == null) {
-            throw new Error("handle this thing better")
+            return [];
         }
 
         const objects: string[] = [];
@@ -123,19 +158,62 @@ export class S3Storage implements IObjectStorage {
         return objects;
     }
 
-    move(sourcePath: string, destinationPath: string): Promise<void> {
-        return Promise.resolve(undefined);
+    async move(sourcePath: string, destinationPath: string): Promise<void> {
+        await this.copy(sourcePath, destinationPath);
+        await this.delete(sourcePath);
     }
 
-    put(path: string, content: Buffer | string, options?: PutOptions): Promise<void> {
-        return Promise.resolve(undefined);
+    async put(path: string, content: Buffer | string, options?: PutOptions): Promise<void> {
+        try {
+            const command = new PutObjectCommand({
+                Body: content,
+                Bucket: this.bucketName,
+                Key: path,
+                CacheControl: options?.cacheControl,
+                ContentType: options?.contentType,
+                ContentLanguage: options?.contentLanguage,
+                ContentDisposition: options?.contentDisposition,
+                ContentEncoding: options?.contentEncoding,
+                ContentMD5: options?.contentMD5,
+                Metadata: options?.metadata
+            });
+
+            await this.client.send(command);
+        } catch (error: unknown) {
+            if (error instanceof S3ServiceException) {
+                if (error.message === "The Content-Md5 you specified did not match what we received.") {
+                    throw new BlobMismatchedMD5IntegrityError(options?.contentMD5 ?? "", "");
+                }
+            }
+        }
     }
 
     putStream(path: string, options?: PutOptions): Promise<Writable> {
-        return Promise.resolve(new Writable())
+        return Promise.resolve(new Writable());
     }
 
-    stat(path: string): Promise<StatResponse> {
-        return Promise.resolve(undefined);
+    async stat(path: string): Promise<StatResponse> {
+        const command = new GetObjectAttributesCommand({
+            Bucket: this.bucketName,
+            Key: path,
+            ObjectAttributes: ["ETag", "Checksum", "ObjectParts", "ObjectSize", "StorageClass"]
+        });
+
+        try {
+            const response = await this.client.send(command);
+
+            return {
+                createdTime: new Date(0),
+                etag: response.ETag ?? "",
+                lastModified: response.LastModified ?? new Date(0),
+                size: response.ObjectSize ?? 0
+            };
+        } catch (error: unknown) {
+            if (error instanceof NotFound || error instanceof NoSuchKey) {
+                throw new BlobFileNotExistError(path);
+            }
+
+            throw error;
+        }
     }
 }

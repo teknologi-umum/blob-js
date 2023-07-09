@@ -1,0 +1,22 @@
+services:
+  s3:
+    image: minio/minio:edge-cicd
+    environment:
+      MINIO_ROOT_USER: teknologi-umum
+      MINIO_ROOT_PASSWORD: very-strong-password
+    ports:
+      - 9000:9000
+    healthcheck:
+      test: "curl -f http://localhost:9000/minio/health/live"
+      interval: 45s
+      timeout: 30s
+      retries: 10
+      start_period: 120s
+  gcs:
+    image: fsouza/fake-gcs-server
+    ports:
+      - 4443:4443
+  azblob:
+    image: mcr.microsoft.com/azure-storage/azurite
+    ports:
+      - 10000:10000
