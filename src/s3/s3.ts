@@ -74,7 +74,6 @@ export class S3Storage implements IObjectStorage {
 
             throw error;
         }
-
     }
 
     async delete(path: string): Promise<void> {

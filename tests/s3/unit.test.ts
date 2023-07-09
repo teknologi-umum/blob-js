@@ -20,7 +20,7 @@ describe("S3 Provider - Unit", () => {
         },
         disableHostPrefix: true,
         forcePathStyle: true,
-        region: "us-east-1",
+        region: "us-east-1"
         // NOTE: For debugging purpose, uncomment this line below to know
         //       what the SDK is doing. Otherwise, you'd be as confused
         //       as I was.
