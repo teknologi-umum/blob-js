@@ -121,7 +121,7 @@ describe("S3 Provider - Unit", () => {
             .toHaveLength(0);
     });
 
-    it("should throw an error on copying not existing file", () => {
+    it("should throw an error on copying non existing file", () => {
         const s3Storage = new S3Storage(connectionStringConfig);
 
         expect(s3Storage.copy("not-exists.txt", "not-exists.rst"))

@@ -1,4 +1,6 @@
 import {
+    BucketAlreadyExists,
+    BucketAlreadyOwnedByYou,
     CreateBucketCommand,
     DeleteBucketCommand,
     DeleteObjectsCommand,
@@ -7,11 +9,19 @@ import {
 } from "@aws-sdk/client-s3";
 
 export async function setupBucket(client: S3Client, bucketName: string): Promise<void> {
-    const command = new CreateBucketCommand({
-        Bucket: bucketName
-    });
+    try {
+        const command = new CreateBucketCommand({
+            Bucket: bucketName
+        });
 
-    await client.send(command);
+        await client.send(command);
+    } catch (error: unknown) {
+        if (error instanceof BucketAlreadyOwnedByYou || error instanceof BucketAlreadyExists) {
+            return Promise.resolve();
+        }
+
+        throw error;
+    }
 }
 
 export async function removeAllObject(client: S3Client, bucketName: string): Promise<void> {

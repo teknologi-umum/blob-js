@@ -59,16 +59,20 @@ export class S3Storage implements IObjectStorage {
     }
 
     async copy(sourcePath: string, destinationPath: string): Promise<void> {
-        const command = new CopyObjectCommand({
-            Bucket: this.bucketName,
-            CopySource: `${this.bucketName}/${sourcePath}`,
-            Key: destinationPath
-        });
-
         try {
+            const command = new CopyObjectCommand({
+                Bucket: this.bucketName,
+                CopySource: `${this.bucketName}/${sourcePath}`,
+                Key: destinationPath
+            });
+
             await this.client.send(command);
         } catch (error: unknown) {
             if (error instanceof NotFound || error instanceof NoSuchKey) {
+                throw new BlobFileNotExistError(sourcePath);
+            }
+
+            if (typeof error === "object" && error != null && "Code" in error && error?.Code === "NoSuchKey") {
                 throw new BlobFileNotExistError(sourcePath);
             }
 
@@ -103,17 +107,21 @@ export class S3Storage implements IObjectStorage {
                 return false;
             }
 
+            if (typeof error === "object" && error != null && "Code" in error && error?.Code === "NoSuchKey") {
+                throw false;
+            }
+
             throw error;
         }
     }
 
     async get(path: string, encoding?: string): Promise<Buffer> {
-        const command = new GetObjectCommand({
-            Bucket: this.bucketName,
-            Key: path
-        });
-
         try {
+            const command = new GetObjectCommand({
+                Bucket: this.bucketName,
+                Key: path
+            });
+
             const response = await this.client.send(command);
 
             if (response.Body == null) {
@@ -124,6 +132,10 @@ export class S3Storage implements IObjectStorage {
             return Buffer.from(byteArray.buffer);
         } catch (error: unknown) {
             if (error instanceof NotFound || error instanceof NoSuchKey) {
+                throw new BlobFileNotExistError(path);
+            }
+
+            if (typeof error === "object" && error != null && "Code" in error && error?.Code === "NoSuchKey") {
                 throw new BlobFileNotExistError(path);
             }
 
@@ -184,6 +196,8 @@ export class S3Storage implements IObjectStorage {
                     throw new BlobMismatchedMD5IntegrityError(options?.contentMD5 ?? "", "");
                 }
             }
+
+            throw error;
         }
     }
 
@@ -192,13 +206,13 @@ export class S3Storage implements IObjectStorage {
     }
 
     async stat(path: string): Promise<StatResponse> {
-        const command = new GetObjectAttributesCommand({
-            Bucket: this.bucketName,
-            Key: path,
-            ObjectAttributes: ["ETag", "Checksum", "ObjectParts", "ObjectSize", "StorageClass"]
-        });
-
         try {
+            const command = new GetObjectAttributesCommand({
+                Bucket: this.bucketName,
+                Key: path,
+                ObjectAttributes: ["ETag", "Checksum", "ObjectParts", "ObjectSize", "StorageClass"]
+            });
+
             const response = await this.client.send(command);
 
             return {
@@ -209,6 +223,10 @@ export class S3Storage implements IObjectStorage {
             };
         } catch (error: unknown) {
             if (error instanceof NotFound || error instanceof NoSuchKey) {
+                throw new BlobFileNotExistError(path);
+            }
+
+            if (typeof error === "object" && error != null && "Code" in error && error?.Code === "NoSuchKey") {
                 throw new BlobFileNotExistError(path);
             }
 
