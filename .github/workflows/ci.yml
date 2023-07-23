@@ -61,7 +61,7 @@ jobs:
         run: npm run build
 
       - name: Test
-        run: npx vitest run --coverage --no-threads
+        run: npx vitest run --coverage
         env:
           TEMP_DIR: ${{ runner.temp }}
           S3_HOST: http://minio:9000
