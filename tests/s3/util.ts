@@ -17,7 +17,7 @@ export async function setupBucket(client: S3Client, bucketName: string): Promise
         await client.send(command);
     } catch (error: unknown) {
         if (error instanceof BucketAlreadyOwnedByYou || error instanceof BucketAlreadyExists) {
-            return Promise.resolve();
+            return;
         }
 
         throw error;
