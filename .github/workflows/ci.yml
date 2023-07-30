@@ -55,7 +55,7 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npx eslint --ignore-path .gitignore .
+        run: npx eslint --ignore-path .gitignore --ext .js,.ts .
 
       - name: Build
         run: npm run build
@@ -64,6 +64,9 @@ jobs:
         run: npx vitest run --coverage
         env:
           TEMP_DIR: ${{ runner.temp }}
+          S3_HOST: http://minio:9000
+          S3_ACCESS: teknologi-umum
+          S3_SECRET: very-strong-password
 
       - name: Send coverage report to Codecov
         uses: codecov/codecov-action@v3
