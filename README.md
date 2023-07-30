@@ -20,7 +20,7 @@ npm install @teknologi-umum/blob
 
 ### Connection String
 
-You would need to acquire a connection string from your storage provider of choise.
+You would need to acquire a connection string from your storage provider of choice.
 
 AWS (or any other S3-compatible
 storage): `s3://access_key:secret_key@bucket_name?forcePathStyle=true&customUserAgent=your_user_agent&more_config=more_value`
@@ -64,10 +64,10 @@ Filesystem: `file:///path/to/directory`
   not the blob exists.
 * `delete(path: string): Promise<void>`: This method is used to delete a blob. The `path` parameter specifies the name
   of the blob to be deleted. The method returns a promise that resolves when the blob has been deleted.
-* `copy(sourcePath: string, destinationPath: string): Promise<void>`: This method is used to copy a blob. The sourcePath
-  parameter specifies the name of the blob to be copied. The destinationPath parameter specifies the name of the blob to
+* `copy(sourcePath: string, destinationPath: string): Promise<void>`: This method is used to copy a blob. The `sourcePath`
+  parameter specifies the name of the blob to be copied. The `destinationPath` parameter specifies the name of the blob to
   copy the source blob to. The method returns a promise that resolves when the blob has been copied.
-* `move(sourcePath: string, destinationPath: string): Promise<void>`: This method is used to move a blob. The sourcePath
+* `move(sourcePath: string, destinationPath: string): Promise<void>`: This method is used to move a blob. The `sourcePath`
   parameter specifies the name of the blob to be moved. The `destinationPath` parameter specifies the name of the blob
   to move the source blob to. The method returns a promise that resolves when the blob has been moved.
 
