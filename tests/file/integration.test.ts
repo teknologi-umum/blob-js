@@ -1,5 +1,5 @@
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
-import { join, normalize } from "node:path";
+import { dirname, join, normalize } from "node:path";
 import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
@@ -98,6 +98,7 @@ describe("File Provider - Integration", () => {
         }
 
         console.log(`Paths: ${Array.from(paths).join(", ")}`);
+        console.log(`Directories: \n- ${Array.from(paths).map(i => dirname(i)).join("\n- ")}`)
         console.log(`Total files (supposedly): ${totalFiles}, total files (by paths): ${paths.size}`);
 
         await Promise.all(tasks);

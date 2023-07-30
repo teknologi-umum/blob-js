@@ -83,7 +83,7 @@ export class FileStorage implements IObjectStorage {
         console.log(`Scanning directory: ${path}`);
 
         let files: string[] = [];
-        const directoryEntries = await readdir(join(this.basePath, path), { withFileTypes: true, recursive: true });
+        const directoryEntries = await readdir(join(this.basePath, path), { withFileTypes: true, recursive: false });
         for await (const directory of directoryEntries) {
             if (directory.isDirectory()) {
                 const subdirectoryFiles = await this.list(join(path, directory.name));
