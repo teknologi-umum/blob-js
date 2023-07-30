@@ -98,7 +98,7 @@ describe("File Provider - Integration", () => {
         }
 
         console.log(`Paths: ${Array.from(paths).join(", ")}`);
-        console.log(`Directories: \n- ${Array.from(paths).map(i => dirname(i)).join("\n- ")}`)
+        console.log(`Directories: \n- ${Array.from(paths).map(i => dirname(i)).join("\n- ")}`);
         console.log(`Total files (supposedly): ${totalFiles}, total files (by paths): ${paths.size}`);
 
         await Promise.all(tasks);
