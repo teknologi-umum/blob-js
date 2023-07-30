@@ -1,5 +1,5 @@
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
-import { dirname, join, normalize } from "node:path";
+import { join, normalize } from "node:path";
 import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
@@ -97,18 +97,12 @@ describe("File Provider - Integration", () => {
             tasks.push(fileStorage.put(filePath, content));
         }
 
-        console.log(`Paths: ${Array.from(paths).join(", ")}`);
-        console.log(`Directories: \n- ${Array.from(paths).map(i => dirname(i)).join("\n- ")}`);
-        console.log(`Total files (supposedly): ${totalFiles}, total files (by paths): ${paths.size}`);
-
         await Promise.all(tasks);
-
 
         ctx.expect(fileStorage.list()).resolves.toSatisfy((entries: unknown) => {
             if (typeof entries === "object" && Array.isArray(entries)) {
                 let count = 0;
                 for (const entry of entries) {
-                    console.log(`Count: ${count}; Entry name: ${entry}`);
                     ctx.expect(paths.has(entry)).toBeTruthy();
                     count += 1;
                 }

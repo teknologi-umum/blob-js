@@ -80,8 +80,6 @@ export class FileStorage implements IObjectStorage {
     }
 
     async list(path = "."): Promise<Array<string>> {
-        console.log(`Scanning directory: ${path}`);
-
         let files: string[] = [];
         const directoryEntries = await readdir(join(this.basePath, path), { withFileTypes: true, recursive: false });
         for await (const directory of directoryEntries) {
