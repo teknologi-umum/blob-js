@@ -1,11 +1,11 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { join, normalize } from "node:path";
 import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { loremIpsum } from "lorem-ipsum";
-import { FileStorage } from "../../src/file/file";
 import { createHash } from "node:crypto";
+import { loremIpsum } from "lorem-ipsum";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { FileStorage } from "../../src/file/file";
 
 describe("File Provider - Integration", () => {
     let temporaryDirectory: string;
@@ -19,23 +19,23 @@ describe("File Provider - Integration", () => {
     });
 
     afterEach(async () => {
-        await rm(temporaryDirectory, { force: true, recursive: true });
-        await mkdir(temporaryDirectory, { recursive: true });
+        await rm(temporaryDirectory, {force: true, recursive: true});
+        await mkdir(temporaryDirectory, {recursive: true});
     });
 
     afterAll(async () => {
-        await rm(temporaryDirectory, { force: true, recursive: true });
+        await rm(temporaryDirectory, {force: true, recursive: true});
     });
 
     it("should be able to create, read, and delete file", async () => {
-        const content = loremIpsum({ count: 1024, units: "sentences" });
+        const content = loremIpsum({count: 1024, units: "sentences"});
         const hashFunc = createHash("md5");
         hashFunc.update(content);
         const checksum = hashFunc.digest("base64");
 
         const fileStorage = new FileStorage(temporaryDirectory);
 
-        await fileStorage.put("lorem-ipsum.txt", content, { contentMD5: checksum });
+        await fileStorage.put("lorem-ipsum.txt", content, {contentMD5: checksum});
 
         expect(fileStorage.exists("lorem-ipsum.txt"))
             .resolves
@@ -74,7 +74,7 @@ describe("File Provider - Integration", () => {
         expect(count).toStrictEqual(totalFiles);
     });
 
-    it("should be able to list files with nested path", async () => {
+    it("should be able to list files with nested path", async (ctx) => {
         const fileStorage = new FileStorage(temporaryDirectory);
         const paths = new Set<string>();
         const totalFiles = 100;
@@ -83,7 +83,10 @@ describe("File Provider - Integration", () => {
             const content = loremIpsum();
             let filePath: string;
             if (i % 3 === 0) {
-                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}-${i}.txt`;
+                filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({
+                    count: 1,
+                    units: "word"
+                })}/${loremIpsum({count: 1, units: "word"})}-${i}.txt`;
             } else if (i % 2 === 0) {
                 filePath = `${loremIpsum({count: 1, units: "word"})}/${loremIpsum({count: 1, units: "word"})}-${i}.txt`;
             } else {
@@ -94,16 +97,16 @@ describe("File Provider - Integration", () => {
             tasks.push(fileStorage.put(filePath, content));
         }
 
-        await Promise.allSettled(tasks);
+        await Promise.all(tasks);
 
-        expect(fileStorage.list()).resolves.toSatisfy((entries: unknown) => {
+        ctx.expect(fileStorage.list()).resolves.toSatisfy((entries: unknown) => {
             if (typeof entries === "object" && Array.isArray(entries)) {
                 let count = 0;
                 for (const entry of entries) {
-                    expect(paths.has(entry)).toBeTruthy();
+                    ctx.expect(paths.has(entry)).toBeTruthy();
                     count += 1;
                 }
-    
+
                 return count === totalFiles;
             }
 

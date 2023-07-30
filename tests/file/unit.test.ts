@@ -1,11 +1,11 @@
-import { afterEach, beforeAll, describe, it, expect, afterAll } from "vitest";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { createHash } from "node:crypto";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { loremIpsum } from "lorem-ipsum";
 import { FileStorage } from "../../src/file/file";
-import { createHash } from "node:crypto";
 import { BlobFileNotExistError, BlobMismatchedMD5IntegrityError } from "../../src/errors";
 
 describe("File Provider - Unit", () => {
@@ -20,16 +20,16 @@ describe("File Provider - Unit", () => {
     });
 
     afterEach(async () => {
-        await rm(temporaryDirectory, { force: true, recursive: true });
-        await mkdir(temporaryDirectory, { recursive: true });
+        await rm(temporaryDirectory, {force: true, recursive: true});
+        await mkdir(temporaryDirectory, {recursive: true});
     });
 
     afterAll(async () => {
-        await rm(temporaryDirectory, { force: true, recursive: true });
+        await rm(temporaryDirectory, {force: true, recursive: true});
     });
 
     it("should be able to write a normal file", () => {
-        const content = loremIpsum({ count: 512, format: "plain", units: "sentences" });
+        const content = loremIpsum({count: 512, format: "plain", units: "sentences"});
 
         const fileStorage = new FileStorage(temporaryDirectory);
 
@@ -39,33 +39,33 @@ describe("File Provider - Unit", () => {
     });
 
     it("should be able to write a normal file with md5 checksum", () => {
-        const content = loremIpsum({ count: 512, format: "plain", units: "sentences" });
+        const content = loremIpsum({count: 512, format: "plain", units: "sentences"});
         const hashFunc = createHash("md5");
         hashFunc.update(content);
         const checksum = hashFunc.digest("base64");
 
         const fileStorage = new FileStorage(temporaryDirectory);
 
-        expect(fileStorage.put("md5-checksum.txt", content, { contentMD5: checksum }))
+        expect(fileStorage.put("md5-checksum.txt", content, {contentMD5: checksum}))
             .resolves
             .ok;
     });
 
     it("should throw an error for invalid md5 checksum", () => {
-        const content = loremIpsum({ count: 512, format: "plain", units: "sentences" });
+        const content = loremIpsum({count: 512, format: "plain", units: "sentences"});
         const hashFunc = createHash("md5");
         hashFunc.update(content);
         const checksum = hashFunc.digest("base64");
 
         const fileStorage = new FileStorage(temporaryDirectory);
 
-        expect(fileStorage.put("invalid-md5-checksum.txt", content, { contentMD5: "hahahaha" }))
+        expect(fileStorage.put("invalid-md5-checksum.txt", content, {contentMD5: "hahahaha"}))
             .rejects
             .toThrowError(new BlobMismatchedMD5IntegrityError("hahahaha", checksum));
     });
 
     it("should be able to write a nested file", () => {
-        const content = loremIpsum({ count: 512, format: "plain", units: "sentences" });
+        const content = loremIpsum({count: 512, format: "plain", units: "sentences"});
 
         const fileStorage = new FileStorage(temporaryDirectory);
 
