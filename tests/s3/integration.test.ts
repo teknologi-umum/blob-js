@@ -49,14 +49,14 @@ describe("S3 Provider - Integration", () => {
     });
 
     it("should be able to create, read and delete file", async () => {
-        const content = loremIpsum({ count: 1024, units: "sentences" });
+        const content = loremIpsum({count: 1024, units: "sentences"});
         const hashFunc = createHash("md5");
         hashFunc.update(content);
         const checksum = hashFunc.digest("base64");
 
         const s3Client = new S3Storage(connectionStringConfig);
 
-        await s3Client.put("lorem-ipsum.txt", content, { contentMD5: checksum });
+        await s3Client.put("lorem-ipsum.txt", content, {contentMD5: checksum});
 
         expect(s3Client.exists("lorem-ipsum.txt"))
             .resolves
