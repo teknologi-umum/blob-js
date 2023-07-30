@@ -60,6 +60,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Prepare temporary directory
+        run: |
+          mkdir -p ${{ runner.temp }}
+          chown -R $(whoami):$(whoami) ${{ runner.temp }}
+
       - name: Test
         run: npx vitest run --coverage
         env:

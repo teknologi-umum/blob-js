@@ -94,12 +94,16 @@ describe("File Provider - Integration", () => {
             tasks.push(fileStorage.put(filePath, content));
         }
 
+        console.log(`Paths: ${Array.from(paths).join(", ")}`);
+        console.log(`Total files (supposedly): ${totalFiles}, total files (by paths): ${paths.size}`);
+
         await Promise.allSettled(tasks);
 
         expect(fileStorage.list()).resolves.toSatisfy((entries: unknown) => {
             if (typeof entries === "object" && Array.isArray(entries)) {
                 let count = 0;
                 for (const entry of entries) {
+                    console.log(`Count: ${count}; Entry name: ${entry}`);
                     expect(paths.has(entry)).toBeTruthy();
                     count += 1;
                 }
