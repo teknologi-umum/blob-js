@@ -108,7 +108,7 @@ export class S3Storage implements IObjectStorage {
             }
 
             if (typeof error === "object" && error != null && "Code" in error && error?.Code === "NoSuchKey") {
-                throw false;
+                return false;
             }
 
             throw error;
