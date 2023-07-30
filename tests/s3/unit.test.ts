@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, describe, it, expect, afterAll } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { loremIpsum } from "lorem-ipsum";
 import { createHash } from "node:crypto";
 import { BlobFileNotExistError, BlobMismatchedMD5IntegrityError } from "../../src/errors";
@@ -55,7 +55,7 @@ describe("S3 Provider - Unit", () => {
 
 
     it("should be able to write a normal file", () => {
-        const content = loremIpsum({ count: 512, format: "plain", units: "sentences" });
+        const content = loremIpsum({count: 512, format: "plain", units: "sentences"});
 
         const s3Storage = new S3Storage(connectionStringConfig);
 
@@ -65,30 +65,30 @@ describe("S3 Provider - Unit", () => {
     });
 
     it("should be able to write a normal file with md5 checksum", () => {
-        const content = loremIpsum({ count: 512, format: "plain", units: "sentences" });
+        const content = loremIpsum({count: 512, format: "plain", units: "sentences"});
         const hashFunc = createHash("md5");
         hashFunc.update(content);
         const checksum = hashFunc.digest("base64");
 
         const s3Storage = new S3Storage(connectionStringConfig);
 
-        expect(s3Storage.put("md5-checksum.txt", content, { contentMD5: checksum }))
+        expect(s3Storage.put("md5-checksum.txt", content, {contentMD5: checksum}))
             .resolves
             .ok;
     });
 
     it("should throw an error for invalid md5 checksum", () => {
-        const content = loremIpsum({ count: 512, format: "plain", units: "sentences" });
+        const content = loremIpsum({count: 512, format: "plain", units: "sentences"});
 
         const s3Storage = new S3Storage(connectionStringConfig);
 
-        expect(s3Storage.put("invalid-md5-checksum.txt", content, { contentMD5: "1B2M2Y8AsgTpgAmY7PhCfg==" }))
+        expect(s3Storage.put("invalid-md5-checksum.txt", content, {contentMD5: "1B2M2Y8AsgTpgAmY7PhCfg=="}))
             .rejects
             .toThrowError(new BlobMismatchedMD5IntegrityError("1B2M2Y8AsgTpgAmY7PhCfg==", ""));
     });
 
     it("should be able to write a nested file", () => {
-        const content = loremIpsum({ count: 512, format: "plain", units: "sentences" });
+        const content = loremIpsum({count: 512, format: "plain", units: "sentences"});
 
         const s3Storage = new S3Storage(connectionStringConfig);
 

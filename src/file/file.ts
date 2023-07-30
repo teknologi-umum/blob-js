@@ -81,7 +81,7 @@ export class FileStorage implements IObjectStorage {
 
     async list(path = "."): Promise<Array<string>> {
         let files: string[] = [];
-        const directoryEntries = await readdir(join(this.basePath, path), { withFileTypes: true, recursive: true });
+        const directoryEntries = await readdir(join(this.basePath, path), { withFileTypes: true, recursive: false });
         for await (const directory of directoryEntries) {
             if (directory.isDirectory()) {
                 const subdirectoryFiles = await this.list(join(path, directory.name));

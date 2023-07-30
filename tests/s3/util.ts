@@ -31,7 +31,7 @@ export async function removeAllObject(client: S3Client, bucketName: string): Pro
 
     const listObjResponse = await client.send(listObjCommand);
 
-    const objectKeys: {Key: string}[] = [];
+    const objectKeys: { Key: string }[] = [];
 
     if (listObjResponse.Contents !== undefined) {
         for (const object of listObjResponse.Contents) {
