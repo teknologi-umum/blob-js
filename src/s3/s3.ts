@@ -7,9 +7,9 @@ import {
     GetObjectCommand, HeadObjectCommand, ListObjectsV2Command, NoSuchKey,
     NotFound, PutObjectCommand,
     S3Client,
-    type S3ClientConfig, S3ServiceException
+    type S3ClientConfig, S3ServiceException, CompleteMultipartUploadCommand, CreateMultipartUploadCommand, UploadPartCommand
 } from "@aws-sdk/client-s3";
-import { BlobFileNotExistError, BlobMismatchedMD5IntegrityError } from "../errors";
+import { BlobFileNotExistError, BlobMismatchedMD5IntegrityError, UnimplementedError } from "../errors";
 
 export class S3Storage implements IObjectStorage {
     private readonly client: S3Client;
@@ -144,7 +144,7 @@ export class S3Storage implements IObjectStorage {
     }
 
     async getStream(path: string): Promise<Readable> {
-        return new Readable();
+        throw new UnimplementedError();
     }
 
     async list(path?: string): Promise<Iterable<string>> {
@@ -201,8 +201,69 @@ export class S3Storage implements IObjectStorage {
         }
     }
 
-    putStream(path: string, options?: PutOptions): Promise<Writable> {
-        return Promise.resolve(new Writable());
+    async putStream(path: string, options?: PutOptions): Promise<Writable> {
+        const command = new CreateMultipartUploadCommand({
+            Bucket: this.bucketName,
+            Key: path,
+            Metadata: options?.metadata,
+            CacheControl: options?.cacheControl,
+            ContentEncoding: options?.contentEncoding,
+            ContentDisposition: options?.contentDisposition,
+            ContentType: options?.contentType,
+            ContentLanguage: options?.contentLanguage
+        });
+
+        const response = await this.client.send(command);
+        const uploadIdentifier = response.UploadId;
+
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const that = this;
+        return new Writable({
+            defaultEncoding: "binary",
+            write(chunk: any, encoding: BufferEncoding, callback: (error?: (Error | null)) => void) {
+                const command = new UploadPartCommand({
+                    Body: chunk,
+                    Bucket: that.bucketName,
+                    Key: path,
+                    UploadId: uploadIdentifier,
+                    PartNumber: 0
+                });
+
+                that.client.send(command).catch((error: Error | null | undefined) => error ? callback(error) : callback(null));
+            },
+            writev(chunks: Array<{
+                chunk: any;
+                encoding: BufferEncoding;
+            }>, callback: (error?: (Error | null)) => void) {
+                for (let i = 0; i < chunks.length; i++) {
+                    const command = new UploadPartCommand({
+                        Body: chunks[i]?.chunk,
+                        Bucket: that.bucketName,
+                        Key: path,
+                        UploadId: uploadIdentifier,
+                        PartNumber: i
+                    });
+
+                    that.client.send(command).catch((error: Error | null | undefined) => error ? callback(error) : callback(null));
+                }
+            },
+            final(callback: (error?: (Error | null)) => void) {
+                const command = new CompleteMultipartUploadCommand({
+                    Bucket: that.bucketName,
+                    Key: path,
+                    UploadId: uploadIdentifier
+                });
+
+                that.client.send(command).catch((error: Error | null | undefined) => {
+                    if (error) {
+                        callback(error);
+                        return;
+                    }
+
+                    callback(null);
+                });
+            }
+        });
     }
 
     async stat(path: string): Promise<StatResponse> {
