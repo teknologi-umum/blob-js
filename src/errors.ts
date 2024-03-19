@@ -40,3 +40,9 @@ export class BlobFilePermissionDeniedError extends Error {
         this.name = "BlobFilePermissionDeniedError";
     }
 }
+
+export class UnimplementedError extends Error {
+    constructor() {
+        super("Unimplemented. Please refer to not use this method.");
+    }
+}
