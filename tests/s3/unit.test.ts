@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { BlobFileNotExistError, BlobMismatchedMD5IntegrityError } from "../../src/errors";
 import { S3Client } from "@aws-sdk/client-s3";
 import { ConnectionString } from "../../src/connectionString";
-import { destroyBucket, removeAllObject, setupBucket } from "./util";
+import { destroyBucket, removeAllObject, setupBucket } from "./aws.util";
 import { S3Storage } from "../../src/s3/s3";
 
 describe("S3 Provider - Unit", () => {
