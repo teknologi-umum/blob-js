@@ -5,8 +5,7 @@ import { FileStorage } from "./file/file";
 import { S3Storage } from "./s3/s3";
 
 /**
- *
- * The Storage class implements the IObjectStorage interface and provides a way to interact
+ * The Storage class implements the `IObjectStorage` interface and provides a way to interact
  * with an object storage service. The class takes a connection string as input and uses it
  * to initialize the appropriate implementation class for the specified provider.
  */
@@ -14,10 +13,10 @@ export class Storage implements IObjectStorage {
     readonly #implementation: IObjectStorage;
 
     /**
-     * The Storage constructor takes a connectionString as input and uses it to initialize
+     * The Storage constructor takes a `connectionString` as input and uses it to initialize
      * the appropriate implementation class for the specified provider.
-     * The connectionString is a string that specifies the connection information for
-     * the object storage service. The format of the connectionString depends on the provider.
+     * The `connectionString` is a string that specifies the connection information for
+     * the object storage service. The format of the `connectionString` depends on the provider.
      *
      * The following are the supported providers and their respective connection string formats:
      *
@@ -25,6 +24,7 @@ export class Storage implements IObjectStorage {
      * * Google Cloud: gcs://bucket_name
      * * Azure Blob: azblob://my_container
      * * Filesystem: file:///path/to/directory
+     * 
      * Note: Using any other schemes than s3, gcs, azblob or file will throw a TypeError.
      *
      * For example, the following is a valid connectionString for AWS S3:
