@@ -3,6 +3,7 @@ import { type IObjectStorage, PutOptions, StatResponse } from "./interface";
 import { parseConnectionString } from "./connectionString";
 import { FileStorage } from "./file/file";
 import { S3Storage } from "./s3/s3";
+import { MinioStorage } from "./s3/minio";
 
 /**
  * The Storage class implements the `IObjectStorage` interface and provides a way to interact
@@ -40,7 +41,11 @@ export class Storage implements IObjectStorage {
                 this.#implementation = new FileStorage(parsedConnectionString.bucketName);
                 break;
             case "s3":
-                this.#implementation = new S3Storage(parsedConnectionString);
+                if (parsedConnectionString.parameters?.useMinioSdk === "true") {
+                    this.#implementation = new MinioStorage(parsedConnectionString);
+                } else {
+                    this.#implementation = new S3Storage(parsedConnectionString);
+                }
                 break;
             // case "azblob":
             //     this.#implementation = new AzureBlobStorage(parsedConnectionString);
