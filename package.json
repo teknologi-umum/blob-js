@@ -54,13 +54,13 @@
     "@vitest/coverage-v8": "^2.0.4",
     "eslint": "^8.57.0",
     "lorem-ipsum": "^2.0.8",
-    "rollup": "^4.19.1",
+    "rollup": "^4.22.4",
     "tslib": "^2.6.3",
     "typescript": "^5.5.4",
     "vitest": "^2.0.4"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.620.0",
+    "@aws-sdk/client-s3": "^3.645.0",
     "@azure/storage-blob": "^12.24.0",
     "@google-cloud/storage": "^6.11.0",
     "minio": "^8.0.1"
