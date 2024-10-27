@@ -11,11 +11,12 @@ describe("S3 Provider - Integration", () => {
     const s3Access = process.env.S3_ACCESS ?? "teknologi-umum";
     const s3Secret = process.env.S3_SECRET ?? "very-strong-password";
     const bucketName = "blob-js";
+    const parsedHostUrl = new URL(s3Host);
     const s3Client = new Client({
-        endPoint: s3Host,
+        endPoint: parsedHostUrl.host,
         accessKey: s3Access,
         secretKey: s3Secret,
-        useSSL: false,
+        useSSL: parsedHostUrl.protocol === "https:",
         pathStyle: true,
         region: "us-east-1"
     });
@@ -27,7 +28,7 @@ describe("S3 Provider - Integration", () => {
         bucketName: bucketName,
         parameters: {
             useMinioSdk: "true",
-            endpoint: s3Host,
+            endpoint: parsedHostUrl.host,
             disableHostPrefix: "true",
             forcePathStyle: "true"
         }
