@@ -1,4 +1,4 @@
-# Blob
+# Node Cloud Storage
 
 An agnostic driver for managing object storage in Node.js
 from [Google Cloud Storage](https://cloud.google.com/storage/), [AWS S3](https://aws.amazon.com/s3/), 
@@ -76,7 +76,7 @@ Filesystem: `file:///path/to/directory`
 ### Example
 
 ```typescript
-import { Storage } from "@teknologi-umum/blob";
+import { Storage } from "node-cloud-storage";
 
 const storage = new Storage("YOUR CONNECTION STRING");
 
