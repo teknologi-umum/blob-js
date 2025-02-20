@@ -13,7 +13,9 @@ Storage, and Azure Blob Storage.
 ## Install
 
 ```sh
-npm install @teknologi-umum/blob
+yarn add https://github.com/prolincur/node-cloud-storage.git
+
+npm install https://github.com/prolincur/node-cloud-storage.git
 ```
 
 ## Usage
