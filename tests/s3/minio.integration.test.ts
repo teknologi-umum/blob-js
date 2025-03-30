@@ -55,7 +55,9 @@ describe("S3 Provider - Integration", () => {
 
         const s3Client = new MinioStorage(connectionStringConfig);
 
-        await s3Client.put("lorem-ipsum.txt", content, {contentMD5: checksum});
+        await expect(s3Client.put("lorem-ipsum.txt", content, {contentMD5: checksum}))
+            .resolves
+            .toBeUndefined();
 
         await expect(s3Client.exists("lorem-ipsum.txt"))
             .resolves

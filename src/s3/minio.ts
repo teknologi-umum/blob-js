@@ -45,7 +45,7 @@ export class MinioStorage implements IObjectStorage {
             }
 
             if ("useSSL" in config.parameters) {
-                clientOptions.useSSL = Boolean(config.parameters.useSSL);
+                clientOptions.useSSL = ["true", "1", "yes", "y"].includes(config.parameters.useSSL.toLowerCase());
             }
 
             if ("port" in config.parameters) {
