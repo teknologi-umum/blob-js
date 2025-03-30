@@ -29,7 +29,8 @@ describe("S3 Provider - Integration", () => {
         bucketName: bucketName,
         parameters: {
             useMinioSdk: "true",
-            endpoint: parsedHostUrl.host,
+            endpoint: parsedHostUrl.hostname,
+            port: parsedHostUrl.port,
             disableHostPrefix: "true",
             forcePathStyle: "true"
         }
