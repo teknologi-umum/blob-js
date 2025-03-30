@@ -58,7 +58,7 @@ describe("S3 Provider - Integration", () => {
 
         await s3Client.put("lorem-ipsum.txt", content, {contentMD5: checksum});
 
-        expect(s3Client.exists("lorem-ipsum.txt"))
+        await expect(s3Client.exists("lorem-ipsum.txt"))
             .resolves
             .toStrictEqual(true);
 
@@ -69,8 +69,8 @@ describe("S3 Provider - Integration", () => {
         const fileContent = await s3Client.get("lorem-ipsum.txt");
         expect(fileContent.toString()).toStrictEqual(content);
 
-        expect(s3Client.delete("lorem-ipsum.txt"))
+        await expect(s3Client.delete("lorem-ipsum.txt"))
             .resolves
-            .ok;
+            .toBeUndefined();
     });
 });
