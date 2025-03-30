@@ -13,7 +13,8 @@ describe("S3 Provider - Integration", () => {
     const bucketName = "blob-js";
     const parsedHostUrl = new URL(s3Host);
     const s3Client = new Client({
-        endPoint: parsedHostUrl.host,
+        endPoint: parsedHostUrl.hostname,
+        port: Number.parseInt(parsedHostUrl.port ?? "9000"),
         accessKey: s3Access,
         secretKey: s3Secret,
         useSSL: parsedHostUrl.protocol === "https:",
