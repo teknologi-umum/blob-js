@@ -33,7 +33,7 @@ describe("S3 Provider - Integration", () => {
             port: parsedHostUrl.port,
             disableHostPrefix: "true",
             forcePathStyle: "true",
-            useSSL: "false",
+            useSSL: "false"
         }
     };
 
